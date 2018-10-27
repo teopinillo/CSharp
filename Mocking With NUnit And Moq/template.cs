@@ -5,11 +5,13 @@
 // make the class loosely couple using injections
 //is possible to mock classes, but the method to mock must be virtual
 //is possible mock Virtual Protected Members with: using Moq.Protected;
+//Stubbing: Be able to set up objects and properties and have their values
+// both configured for return as well as be able to change them going forward.
 
 // tools > NUGet Package Manager > Package Manager Console
 // install-package moq
 // install-package NUnit -Version 3.11.0
-// install-package NUnit3TestAdapter â€“version 3.10.0
+// install-package NUnit3TestAdapter –version 3.10.0
 
 //[TestFixture]
 //[TestFixtureSetup]
@@ -113,7 +115,7 @@
 //                               Throws.TypeOf<CustomerCreationException>());
 
 //----------------------------Raise Events
-// mockValidator.Raise ( lambda_expression_evetnt_to_raise, event_arguments);
+// mockValidator.Raise ( lambda_expression_event_to_raise, event_arguments);
 
 //----------------------------Setup multiple returns value 
 //           mockValidator.SetupSequence(x => x.IsValid(It.IsAny<string>()))
@@ -145,7 +147,7 @@
 //mockValidator.Setup(x => x.IsValid(It.IsAny<string>( number => number.StartsWith('x'))).Returns(true);
 //mockValidator.Setup(x => x.IsValid(It.IsInRange("x","y","z",Range.Inclusive))).Returns(true);
 
-
+//-----------------------------------------------------------------------------------------------------Mock Behavior
 // new Mock<Interface>( MockBehavior.Type );
 //MockBehavior.Strict : Throw an exception if a mocked method is called but has not been setup.
 //MockBehavior.Loose: Never throw exceptions, even if a mocked method is called has not been setup.
@@ -171,11 +173,14 @@
 // String is a Sealed class, so, it will return null.
 // int = 0, bool = false, 
 
+//---------------------stubbing properties----------------------------------------------------------
 //By default mock properties don't remember changes made to them during the execution of the test.
 //In other words they don't track changes to their values. To tell Moq to keep track of the
 //changes we use:
-// my_mock.SetupProperty ( x=> x.MyProperty)
+// my_mock.SetupProperty ( x=> x.MyProperty, valueA);
+// my_mock.Object.MyProperty = another_value;
 // my_mock.SetupAllProperties ();
+
 //--------------------------------------------------------Verifying a method is called
 //my_mock.Verify ( x => x.methodToVerify (argument));
 //We can use argument matching: It.IsAny<string>(), for example.
@@ -184,7 +189,7 @@
 //my_mock.Verify ( x => x.methodToVerify (argument),Times.Exactly(2));
 
 //--------------------------------------------------------Verifying a property Getter and Setter
-// my_mock.VerifyGet (x=>x.ServiceInformation.License.LicenseKey);
+// my_mock.VerifyGet (x=>x.ServiceInformation.License.LicenseKey); //Mocking Property Hierarchies.
 // my_mock.VerifySet (x => x.ValidationMode = ValidationMode.Detailed);
 
 //Mocking out argument
@@ -193,7 +198,41 @@
 //Assert
 // Assert.IsTrue(status);
 // Assert.AreEqual(tmpCode, 101202);
-			
+
+//-------------------------------------------------------------------Testing Protected Members
+ using Moq.Protected;
+    public class AddressFormatter 
+    {
+        public void CallingFunction()
+        {
+            string r = ProtectedFunction("a");
+        }
+        protected virtual string ProtectedFunction (string s)
+        {
+            return "5555";
+        }       
+    }
+	
+//Testing Class
+[Test]
+        //Demo, testing Protected members
+        public void Testing_Protected_Members()
+        {
+            //Arrange, our system under test
+            var mockAddresFormatter = new Mock<AddressFormatter>();
+            //Declare the expectation
+            mockAddresFormatter.Protected()
+                .Setup<string>("ProtectedFunction",  //The protected member we want to verify
+                ItExpr.IsAny<string>())
+                .Returns("any value")
+                .Verifiable();          //mark as Verifiable to be able to verify
+            //Act
+            mockAddresFormatter.Object.CallingFunction();
+            //Assert
+            mockAddresFormatter.Verify();
+        }
+
+//------------------------------------------------------------------------------------------------		
 
 
 public void Add_ResultIsAPrimeNumber_ResultAreSaved()
@@ -254,6 +293,9 @@ namespace TestNinje.UnitTests.Mocking
 		}
 }
 
+			
+
+
 
 //other tutorials
 //https://deanhume.com/basic-introduction-to-writing-unit-tests-with-moq-part-2/
@@ -264,3 +306,9 @@ namespace TestNinje.UnitTests.Mocking
 //https://github.com/Moq/moq4/wiki/Quickstart
 //Testing .NET Core Code with xUnit.net: Getting Started" Pluralsight course. By Jason Roberts
 //Mocking With Moq. Pluralsight. Donald Belcham. Jim Cooper.
+
+
+
+
+
+

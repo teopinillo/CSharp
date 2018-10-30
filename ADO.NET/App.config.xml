@@ -1,0 +1,18 @@
+
+<!--Demo Conection String-->
+<!--ConfigurationManager.ConnectionStrings["AWConnection"].ToString(); -->
+
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+    </startup>
+<connectionStrings>
+  <!-- In order to read my configuration string from the code we need to
+  add a reference to System.Configuration-->
+  <add name="AWConnection" 
+       connectionString="Data Source=localhost; Initial Catalog=AdventureWorks2017; Integrated Security=true;"
+       providerName="System.Data.SqlClient"/>
+</connectionStrings>
+  
+</configuration>
